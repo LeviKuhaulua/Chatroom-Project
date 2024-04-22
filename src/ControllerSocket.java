@@ -2,10 +2,17 @@ import java.net.ServerSocket;
 import java.net.Socket; 
 import java.io.PrintWriter; 
 import java.io.IOException;
+/**
+ * Controller Socket that will accept connection between the two sockets then proceed to send out 
+ * the necessary information needed for both clients to accept and communicate with each other. 
+ * @author 
+ *  Levi Kuhaulua
+ */
 public class ControllerSocket {
     public static void main(String[] args) {
         
 
+        // Open up the controller socket for communication. 
         try (ServerSocket connect = new ServerSocket(12345)) {
 
             Socket client1 = connect.accept(); 
