@@ -1,3 +1,6 @@
-
+# Personal Settings for IDE. 
 .vscode/
 
+# Anything where class files or other related files may be stored. 
+bin/
+*.class
