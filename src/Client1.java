@@ -21,7 +21,7 @@ public class Client1 extends Thread {
         ServerSocket connSocket = new ServerSocket(23456); 
 
         // Get the IP and Port number of the client that you want to communicate with. 
-        try (Socket controllerClient = new Socket("192.168.0.8", 12345)) {
+        try (Socket controllerClient = new Socket("127.0.0.1", 12345)) {
 
             // Send out IP address and port number for client 2 to connect. 
             PrintWriter toController = new PrintWriter(controllerClient.getOutputStream(), true); 

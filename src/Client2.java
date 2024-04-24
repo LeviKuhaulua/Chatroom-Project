@@ -20,7 +20,7 @@ public class Client2 extends Thread {
         ServerSocket connSocket = new ServerSocket(23456); 
 
         // Communicate with Controller Socket to get IP and Port of other client. Replace hostname with target IP. 
-        try (Socket controllerClient = new Socket("192.168.0.8", 12345)) {
+        try (Socket controllerClient = new Socket("127.0.0.1", 12345)) {
             
             // Send out it's own information to Controller client. 
             PrintWriter toController = new PrintWriter(controllerClient.getOutputStream(), true); 
