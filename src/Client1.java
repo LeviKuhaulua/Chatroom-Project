@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader; 
 import java.io.PrintWriter; 
 import java.net.Socket; 
+import java.net.ServerSocket; 
 import java.net.UnknownHostException; 
 
 /**
@@ -12,10 +13,19 @@ import java.net.UnknownHostException;
 public class Client1 {
     public static void main(String[] args) throws IOException{
         String client2IP = null; 
-        int client2Port = 123456; 
+        int client2Port = 12345; 
+
+        // Initialize a server socket to have client 2 to connect to. 
+        ServerSocket connSocket = new ServerSocket(23456); 
 
         // Get the IP and Port number of the client that you want to communicate with. 
         try (Socket controllerClient = new Socket("127.0.0.1", 12345)) {
+
+            // Send out IP address and port number for client 2 to connect. 
+            PrintWriter toController = new PrintWriter(controllerClient.getOutputStream(), true); 
+            toController.println(connSocket.getInetAddress().getHostAddress()); 
+            toController.println(connSocket.getLocalPort()); 
+
             BufferedReader fromController = new BufferedReader(new InputStreamReader(controllerClient.getInputStream())); 
 
             client2IP = fromController.readLine(); 
@@ -23,7 +33,8 @@ public class Client1 {
             System.out.println("Client 2 IP: " + client2IP);
             System.out.println("Client 2 Port: " + client2Port);
 
-            fromController.close(); 
+            fromController.close();
+            toController.close();  
             controllerClient.close(); 
         } catch (UnknownHostException e) {
             System.err.println("Unknown Hostname: " + e.getMessage());
@@ -35,7 +46,7 @@ public class Client1 {
 
         // Communication with other client section. 
         try (
-             Socket client2 = new Socket(client2IP, client2Port);
+             Socket client2 = connSocket.accept(); 
              BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
             
@@ -70,6 +81,8 @@ public class Client1 {
             System.err.println("Error: " + e.getMessage());
             System.exit(1); 
         }
+
+        connSocket.close(); 
 
     }
 }

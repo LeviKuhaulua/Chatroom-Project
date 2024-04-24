@@ -2,6 +2,8 @@ import java.net.ServerSocket;
 import java.net.Socket; 
 import java.io.PrintWriter; 
 import java.io.IOException;
+import java.io.BufferedReader; 
+import java.io.InputStreamReader;
 /**
  * Controller Socket that will accept connection between the two sockets then proceed to send out 
  * the necessary information needed for both clients to accept and communicate with each other. 
@@ -18,12 +20,15 @@ public class ControllerSocket {
             Socket client1 = connect.accept(); 
             Socket client2 = connect.accept(); 
 
-            // Get the IP and port number of both clients
-            String client1IP = client1.getInetAddress().getHostAddress(); 
-            int client1Port = client1.getLocalPort();  
+            // Get the IP Address Information and Port number for clients. 
+            BufferedReader fromClient1 = new BufferedReader(new InputStreamReader(client1.getInputStream())); 
+            BufferedReader fromClient2 = new BufferedReader(new InputStreamReader(client2.getInputStream())); 
 
-            String client2IP = client2.getInetAddress().getHostAddress(); 
-            int client2Port = client2.getLocalPort(); 
+            String client1IP = fromClient1.readLine(); 
+            String client1Port = fromClient1.readLine();
+            
+            String client2IP = fromClient2.readLine(); 
+            String client2Port = fromClient2.readLine(); 
 
 
             // Send the IP and Local Port information to both clients. 

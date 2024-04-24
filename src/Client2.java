@@ -1,9 +1,10 @@
 import java.io.IOException; 
-import java.net.UnknownHostException; 
 import java.io.BufferedReader; 
 import java.io.InputStreamReader;
 import java.io.PrintWriter; 
 import java.net.Socket; 
+import java.net.ServerSocket; 
+import java.net.UnknownHostException; 
 /**
  * @author
  *  Levi Kuhaulua
@@ -11,10 +12,18 @@ import java.net.Socket;
 public class Client2 {
     public static void main(String[] args) throws IOException{
         String client1IP = null; 
-        int client1Port = 123456;  
+        int client1Port = 12345;  
+        
+        // Initialize a server socket to have client 2 to connect to. 
+        ServerSocket connSocket = new ServerSocket(23456); 
 
-        // Communicate with Controller Socket to get IP and Port of other client. 
+        // Communicate with Controller Socket to get IP and Port of other client. Replace hostname with target IP. 
         try (Socket controllerClient = new Socket("127.0.0.1", 12345)) {
+            
+            // Send out it's own information to Controller client. 
+            PrintWriter toController = new PrintWriter(controllerClient.getOutputStream(), true); 
+            toController.println(connSocket.getInetAddress().getHostAddress()); 
+            toController.println(connSocket.getLocalPort()); 
 
             BufferedReader fromController = new BufferedReader(new InputStreamReader(controllerClient.getInputStream())); 
 
@@ -25,6 +34,7 @@ public class Client2 {
 
 
             fromController.close(); 
+            toController.close(); 
             controllerClient.close(); 
         } catch (UnknownHostException e) {
             System.err.println("Unknown Host: " + e.getMessage());
@@ -36,7 +46,7 @@ public class Client2 {
 
         // Communicate with the other client. Need to debug / test. 
         try (
-             Socket client1 = new Socket(client1IP, client1Port);
+             Socket client1 = connSocket.accept();
              BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
 
@@ -70,5 +80,7 @@ public class Client2 {
             System.err.println("I/O Error: " + e.getMessage());
             System.exit(1); 
         }
+
+        connSocket.close(); 
     }
 }
