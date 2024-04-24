@@ -9,7 +9,7 @@ import java.io.IOException;
  *  Levi Kuhaulua
  */
 public class ControllerSocket {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
         
 
         // Open up the controller socket for communication. 
@@ -30,7 +30,8 @@ public class ControllerSocket {
             PrintWriter toClient1 = new PrintWriter(client1.getOutputStream(), true); 
             PrintWriter toClient2 = new PrintWriter(client2.getOutputStream(), true); 
 
-            // Pattern -: IP Address then the Port Number associated with the client. 
+            // Pattern -: IP Address then the Port Number associated with the client.
+            
             toClient1.println(client2IP); 
             toClient1.println(client2Port); 
 
