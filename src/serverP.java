@@ -15,9 +15,11 @@ public class serverP implements Runnable {
     private ServerSocket server;
     private boolean done;
     private ExecutorService pool;
+    private final ChatLogger SERVERLOGGER; 
 
 
     public serverP(){
+        SERVERLOGGER = new ChatLogger("Server", true); 
         connections = new ArrayList<>();
         done = false;
     }
@@ -28,7 +30,8 @@ public class serverP implements Runnable {
     @Override
     public void run(){
         try{
-            server = new ServerSocket(1234);
+            server = new ServerSocket(12345);
+            SERVERLOGGER.getSocketInformation(server); // Log the server information. 
             pool = Executors.newCachedThreadPool();
             while(!done){
                 Socket client = server.accept();
@@ -37,7 +40,7 @@ public class serverP implements Runnable {
                 connections.add(connectionHandle);
                 pool.execute(connectionHandle);
             }
-            shutdown();
+            // shutdown();
             
         }catch(IOException e){
             //TODO: handle
@@ -95,7 +98,7 @@ public class serverP implements Runnable {
                 inFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 outToClient.println("Welcome, please enter your username");
                 userName = inFromClient.readLine(); // whatever the client sends that becomes the username
-                System.out.println(userName +" has connected to the server!");
+                SERVERLOGGER.getSocketInformation(this.client, this.userName); 
                 broadcast(userName + " has joined the chat!");
                 String message;
                 while((message = inFromClient.readLine()) != null){
