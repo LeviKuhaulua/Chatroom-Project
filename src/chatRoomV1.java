@@ -18,7 +18,9 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
     private BufferedReader inFromServer;
     private PrintWriter outToServer;
     private boolean done;
-    
+    private String username; 
+    private boolean connected = false; 
+    private ChatLogger CLIENT; 
     
 
     /**
@@ -154,10 +156,14 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
         // TODO add your handling code here:
+        // Send message to server
         String message = userMessage.getText();
+        while (message.isBlank()) {
+
+        }
         outToServer.println(message);
         userMessage.setText("");
-        //sends message to server 
+        CLIENT.logMessage(message); 
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void quitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quitButtonActionPerformed
@@ -167,10 +173,10 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
         System.exit(0);
         
         try{
-        outToServer = new PrintWriter(client.getOutputStream(), true);
-        outToServer.println(" has left the chat!");
+            outToServer = new PrintWriter(client.getOutputStream(), true);
+            outToServer.println(username + " has left the chat!");
         }catch(IOException e){
-                        e.printStackTrace();
+            e.printStackTrace();
 
         }
         //shuts down program
@@ -181,16 +187,31 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
         //connects the client to the server
         
         try {
-            client = new Socket("localhost", 12345); // Adjust host and port as needed
-            outToServer = new PrintWriter(client.getOutputStream(), true);
-            inFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            Thread messageListener = new Thread(this);
-            messageListener.start();
+            username = JOptionPane.showInputDialog(this,"Enter Username:"); 
+            while (!connected) {
+                if (username == null) {
+                    // Allows them to break out of the Connect Button
+                    break; 
+                } else if (username.isBlank()) {
+                    // If username is empty. 
+                    JOptionPane.showMessageDialog(this, "Invalid Username"); 
+                    username = JOptionPane.showInputDialog(this, "Enter Username:"); 
+                } else {
+                    connectButton.setEnabled(false); // Prevent users from trying to reconnect and cause issues. 
+                    client = new Socket("localhost", 12345); // Adjust host and port as needed
+                    outToServer = new PrintWriter(client.getOutputStream(), true);
+                    inFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                    outToServer.println(username); // Send the username to the server so they know who they're connecting with. 
+                    Thread messageListener = new Thread(this); 
+                    CLIENT = new ChatLogger(username);
+                    messageListener.start();
+                    connected = true; 
+                }
+            }
+            
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Server does not exist!");
-
-            
         }
     }//GEN-LAST:event_connectButtonActionPerformed
 
@@ -252,7 +273,7 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
     public void run() {
         try {
             String message;
-            while ((message = inFromServer.readLine()) != null) {
+            while ((message = inFromServer.readLine()) != null) { 
                 chatLog.append(message + "\n");
             }
         } catch (IOException e) {

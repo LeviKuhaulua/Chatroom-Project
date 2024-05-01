@@ -100,7 +100,6 @@ public class serverP implements Runnable {
 
                 outToClient = new PrintWriter(client.getOutputStream(),true);
                 inFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                outToClient.println("Welcome, please enter your username");
                 userName = inFromClient.readLine(); // whatever the client sends that becomes the username
                 SERVERLOGGER.getSocketInformation(this.client, this.userName); // Get IP and Port information from client
                 broadcast(userName + " has joined the chat!");
