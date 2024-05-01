@@ -4,6 +4,7 @@ import java.util.logging.LogManager;
 import java.util.logging.ConsoleHandler; 
 import java.util.logging.SimpleFormatter; 
 import java.io.IOException;
+import java.io.File; 
 import java.net.InetAddress; 
 import java.net.ServerSocket;
 import java.net.Socket; 
@@ -20,6 +21,7 @@ import java.net.UnknownHostException;
 public class ChatLogger {
     private Logger LOGGER; 
     private FileHandler FILE; 
+    private final File DIR = new File(System.getProperty("user.dir") + File.separator + "resources\\"); 
     private final ConsoleHandler CONSOLE = new ConsoleHandler(); 
 
     /**
@@ -32,6 +34,10 @@ public class ChatLogger {
             LogManager.getLogManager().reset(); 
             // Create a logger and store the log files in the resource directory. 
             LOGGER = Logger.getLogger(name); 
+            // Create the directory to house the log files if it doesn't exist. 
+            if (!DIR.exists()) {
+                DIR.mkdir(); 
+            }
             FILE = new FileHandler(".\\resources\\" + name + ".log", true); // allows for files to be appended to. 
             FILE.setFormatter(new SimpleFormatter()); // Logs the files in more readable format. 
             LOGGER.addHandler(FILE); 
@@ -56,6 +62,10 @@ public class ChatLogger {
             LogManager.getLogManager().reset(); 
             // Create log files and store them in the resources directory
             LOGGER = Logger.getLogger(name); 
+            // Create directory if it doesn't exist. 
+            if (!DIR.exists()) {
+                DIR.mkdir(); 
+            }
             FILE = new FileHandler(".\\resources\\" + name + ".log", true); 
             FILE.setFormatter(new SimpleFormatter()); // Logs the files in more readable format
             LOGGER.addHandler(FILE); 
