@@ -9,15 +9,22 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * @author 
+ *  Somret Say & Levi Kuhaulua
+ */
 public class serverP implements Runnable {
 
     private ArrayList<handler> connections;
     private ServerSocket server;
     private boolean done;
     private ExecutorService pool;
+    private final ChatLogger SERVERLOGGER; 
 
 
     public serverP(){
+        // Create logger for the Server
+        SERVERLOGGER = new ChatLogger("Server", true); 
         connections = new ArrayList<>();
         done = false;
     }
@@ -28,7 +35,8 @@ public class serverP implements Runnable {
     @Override
     public void run(){
         try{
-            server = new ServerSocket(1234);
+            server = new ServerSocket(12345);
+            SERVERLOGGER.getSocketInformation(server); // Log the server information. 
             pool = Executors.newCachedThreadPool();
             while(!done){
                 Socket client = server.accept();
@@ -37,7 +45,6 @@ public class serverP implements Runnable {
                 connections.add(connectionHandle);
                 pool.execute(connectionHandle);
             }
-            shutdown();
             
         }catch(IOException e){
             //TODO: handle
@@ -95,12 +102,15 @@ public class serverP implements Runnable {
                 inFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 outToClient.println("Welcome, please enter your username");
                 userName = inFromClient.readLine(); // whatever the client sends that becomes the username
-                System.out.println(userName +" has connected to the server!");
+                SERVERLOGGER.getSocketInformation(this.client, this.userName); // Get IP and Port information from client
                 broadcast(userName + " has joined the chat!");
                 String message;
                 while((message = inFromClient.readLine()) != null){
                     if(message.equalsIgnoreCase("/quit")){
                         broadcast(userName + " has left the chat!"); 
+                        // Log when users has left the chat. 
+                        SERVERLOGGER.logMessage(userName + " has left the chat"); 
+                        shutdown(); 
                     }
                     else {
                         broadcast(userName + ": " + message);
@@ -127,7 +137,9 @@ public class serverP implements Runnable {
                 outToClient.close();
                 if(!client.isClosed()){
                     client.close();
-                 }
+                }
+                // Log when streams have been closed
+                SERVERLOGGER.logMessage("Streams are closed for " + handler.this.userName); 
             }
             catch(IOException e){
                 //ignore
