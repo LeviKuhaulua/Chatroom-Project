@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * @author 
+ *  Somret Say & Levi Kuhaulua
+ */
 public class serverP implements Runnable {
 
     private ArrayList<handler> connections;

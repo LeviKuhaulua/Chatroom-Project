@@ -4,14 +4,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+/**
+ * @author 
+ *  Somret Say and Levi Kuhaulua
+ */
 public class clientp implements Runnable {
 //Two threads ; 1 from server and then the next for input
     private Socket client;
     private BufferedReader inFromServer;
     private PrintWriter outToServer;
     private boolean done;
-    private ChatLogger CLIENTLOGGER; 
     private String username; 
+    private ChatLogger CLIENT; 
 
     
     
@@ -22,24 +26,33 @@ public class clientp implements Runnable {
             Socket client = new Socket("192.168.0.7", 12345);
             outToServer = new PrintWriter(client.getOutputStream(),true);
             inFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in)); 
 
+            
             Thread inHandler = new Thread(new InputHandler());
-            inHandler.start();
-
             String inMessage;
+
+            // Send username to server then create initial log file with username. 
+            System.out.println(inFromServer.readLine());
+            username = keyboard.readLine(); 
+            outToServer.println(username); 
+            CLIENT = new ChatLogger(username); 
+
+            inHandler.start();  // Done later to prevent NullPointerException for the CLIENT ChatLogger
+
             while((inMessage = inFromServer.readLine()) != null){
-                if (inMessage.equalsIgnoreCase("Welcome, please enter your username")) {
-                    username = inMessage; 
-                    // Create a new log file if user joins the chat
-                    CLIENTLOGGER = new ChatLogger(username); 
+                System.out.println(inMessage);
+                // Chat format goes - USERNAME: MESSAGE...
+                if (inMessage.split(":")[0].equalsIgnoreCase(username)) {
+                    // do nothing here to prevent message from being outputted twice
                 } else {
-                    // Log message sent by other users. 
-                    CLIENTLOGGER.logMessage(inMessage); 
+                    CLIENT.logMessage(inMessage); 
                 }
+                
             }
 
         }catch(IOException e){
-            CLIENTLOGGER.messageException("Error: " + e.getMessage()); 
+            CLIENT.messageException(e.getMessage());
         }finally{
             if(!done){
                 shutdown();
@@ -54,8 +67,7 @@ public class clientp implements Runnable {
             outToServer.close();
             if(client != null && !client.isClosed()){
                 client.close();
-            }
-            CLIENTLOGGER.logMessage("Streams have been closed for " + username); 
+            } 
         }catch(IOException e){
 
         }
@@ -71,24 +83,27 @@ public class clientp implements Runnable {
                     if(message.equalsIgnoreCase("/quit")){
                         outToServer.println(message);
                         // Log status on user if they quit
-                        CLIENTLOGGER.logMessage(username + " has left the chat"); 
+                        CLIENT.logMessage(username + " has left the chat"); 
                         shutdown(); 
                     }
                     else{
                         outToServer.println(message);
-                        CLIENTLOGGER.logMessage(message); // Log out the message sent by the client. 
+                        CLIENT.logMessage(username + ": " + message); // Log out the message sent by the client. 
                     }
                 }
 
             }catch(IOException e){
-                CLIENTLOGGER.messageException(e.getMessage() + "\nClosing the streams"); 
+                CLIENT.messageException(e.getMessage() + "\nClosing the streams"); 
                 shutdown();
 
             }
             
         }
 
+        
     }
+
+    
 
     public static void main(String[] args) {
         clientp client = new clientp();
