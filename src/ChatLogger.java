@@ -1,5 +1,6 @@
 import java.util.logging.Logger; 
 import java.util.logging.FileHandler;
+import java.util.logging.LogManager;
 import java.util.logging.ConsoleHandler; 
 import java.util.logging.SimpleFormatter; 
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.net.Socket;
 import java.net.UnknownHostException; 
 
 /**
- * Handles the logging of information for the {@see serverP} and {@see clientp}. This will keep records on information
+ * Handles the logging of information for the {@link serverP} and {@link clientp}. This will keep records on information
  * that is important for developers or admins to know. 
  * @author 
  *  <a href="mailto:levi.kuhaulua@outlook.com">Levi Kuhaulua</a>
@@ -28,6 +29,7 @@ public class ChatLogger {
      */
     public ChatLogger(String name) {
         try {
+            LogManager.getLogManager().reset(); 
             // Create a logger and store the log files in the resource directory. 
             LOGGER = Logger.getLogger(name); 
             FILE = new FileHandler(".\\resources\\" + name + ".log", true); // allows for files to be appended to. 
@@ -51,6 +53,7 @@ public class ChatLogger {
      */
     public ChatLogger(String name, boolean addConsole) {
         try {
+            LogManager.getLogManager().reset(); 
             // Create log files and store them in the resources directory
             LOGGER = Logger.getLogger(name); 
             FILE = new FileHandler(".\\resources\\" + name + ".log", true); 
@@ -71,11 +74,28 @@ public class ChatLogger {
     }
 
     
+    /**
+     * Gets the Client Socket's information then logs it to the file. 
+     * @param socket
+     *  The {@code Socket} that connected to the server
+     * @param username
+     *  Username that is tied to the socket. 
+     */
     public void getSocketInformation(Socket socket, String username) {
         LOGGER.info(username + " has connected on Port: " + socket.getLocalPort() + 
                     " with IP of : " + socket.getInetAddress().getHostAddress());
     }
 
+    /**
+     * Get the IP Address and Port Number of the Server then log it to the file
+     * @param server
+     *  The {@code ServerSocket} used to listen for connections
+     * @throws 
+     *  UnknownHostException should there be an issue getting the IP Address of the Server. 
+     *  <p> 
+     *      <b>NOTE:</b> This may happen if the ServerSocket is not initialized or if it is blocked for security reasons. 
+     *  </p> 
+     */
     public void getSocketInformation(ServerSocket server) {
         try {
             LOGGER.info("Server has started at " + InetAddress.getLocalHost().getHostAddress() + " on Port " + server.getLocalPort()
@@ -85,20 +105,24 @@ public class ChatLogger {
         }
     }
 
+    /**
+     * Log messages to the log file. 
+     * @param message
+     *  Message from client to be logged
+     */
     public void logMessage(String message) {
         LOGGER.info(message); 
     }
 
+    /**
+     * Logs out any exception messages to the log file. 
+     * @param message
+     *  Exception / Error Message to be logged. 
+     */
     public void messageException(String message) {
         LOGGER.warning(message); 
     }
 
 
     
-    // // Testing and Debugging Purposes
-    // public static void main(String[] args) throws IOException {
-    //     ChatLogger test = new ChatLogger("test"); 
-    //     ChatLogger withConsole = new ChatLogger("withConsole", true); 
-    //     ChatLogger withoutConsole = new ChatLogger("withoutConsole", false); 
-    // }
 }
