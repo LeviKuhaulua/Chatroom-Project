@@ -72,18 +72,8 @@ public class ChatLogger {
 
     
     public void getSocketInformation(Socket socket, String username) {
-        try {
-            if (socket.getLocalAddress().getHostAddress().equals("127.0.0.1")) {
-                LOGGER.info(username + " connected at " + InetAddress.getLocalHost().getHostAddress() +
-                    " on Port: " + socket.getLocalPort()); 
-            } else {
-                LOGGER.info(username + " connected at " + socket.getLocalAddress().getHostAddress() + 
-                    " on Port: " + socket.getLocalPort()); 
-            }
-
-        } catch (UnknownHostException e) {
-            LOGGER.warning(username + " unable to connect to server"); 
-        }
+        LOGGER.info(username + " has connected on Port: " + socket.getLocalPort() + 
+                    " with IP of : " + socket.getInetAddress().getHostAddress());
     }
 
     public void getSocketInformation(ServerSocket server) {
@@ -95,8 +85,12 @@ public class ChatLogger {
         }
     }
 
-    public void logMessage(String username, String message) {
-        LOGGER.info(username + ": " + message); 
+    public void logMessage(String message) {
+        LOGGER.info(message); 
+    }
+
+    public void messageException(String message) {
+        LOGGER.warning(message); 
     }
 
 

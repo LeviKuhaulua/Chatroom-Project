@@ -10,13 +10,16 @@ public class clientp implements Runnable {
     private BufferedReader inFromServer;
     private PrintWriter outToServer;
     private boolean done;
+    private ChatLogger CLIENTLOGGER; 
+    private String username; 
 
+    
     
     @Override
     public void run() {
         // TODO Auto-generated method stub
         try{
-            Socket client = new Socket("172.20.10.6", 12345);
+            Socket client = new Socket("192.168.0.7", 12345);
             outToServer = new PrintWriter(client.getOutputStream(),true);
             inFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
@@ -25,12 +28,18 @@ public class clientp implements Runnable {
 
             String inMessage;
             while((inMessage = inFromServer.readLine()) != null){
-                System.out.println(inMessage);
+                if (inMessage.equalsIgnoreCase("Welcome, please enter your username")) {
+                    username = inMessage; 
+                    // Create a new log file if user joins the chat
+                    CLIENTLOGGER = new ChatLogger(username); 
+                } else {
+                    // Log message sent by other users. 
+                    CLIENTLOGGER.logMessage(inMessage); 
+                }
             }
 
         }catch(IOException e){
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            CLIENTLOGGER.messageException("Error: " + e.getMessage()); 
         }finally{
             if(!done){
                 shutdown();
@@ -46,6 +55,7 @@ public class clientp implements Runnable {
             if(client != null && !client.isClosed()){
                 client.close();
             }
+            CLIENTLOGGER.logMessage("Streams have been closed for " + username); 
         }catch(IOException e){
 
         }
@@ -60,14 +70,18 @@ public class clientp implements Runnable {
                     String message = inReader.readLine();
                     if(message.equalsIgnoreCase("/quit")){
                         outToServer.println(message);
+                        // Log status on user if they quit
+                        CLIENTLOGGER.logMessage(username + " has left the chat"); 
+                        shutdown(); 
                     }
                     else{
                         outToServer.println(message);
+                        CLIENTLOGGER.logMessage(message); // Log out the message sent by the client. 
                     }
                 }
 
-                shutdown(); 
             }catch(IOException e){
+                CLIENTLOGGER.messageException(e.getMessage() + "\nClosing the streams"); 
                 shutdown();
 
             }
