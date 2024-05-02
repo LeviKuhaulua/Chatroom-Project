@@ -105,7 +105,7 @@ public class serverP implements Runnable {
                 broadcast(userName + " has joined the chat!");
                 String message;
                 while((message = inFromClient.readLine()) != null){
-                    if(message.equalsIgnoreCase("/quit")){
+                    if(message.equalsIgnoreCase("has left the chat!")){
                         broadcast(userName + " has left the chat!"); 
                         // Log when users has left the chat. 
                         SERVERLOGGER.logMessage(userName + " has left the chat"); 
