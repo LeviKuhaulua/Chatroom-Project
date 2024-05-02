@@ -23,7 +23,7 @@ public class clientp implements Runnable {
     public void run() {
         // TODO Auto-generated method stub
         try{
-            Socket client = new Socket("192.168.0.7", 12345);
+            Socket client = new Socket("127.0.0.1", 12345);
             outToServer = new PrintWriter(client.getOutputStream(),true);
             inFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
             BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in)); 

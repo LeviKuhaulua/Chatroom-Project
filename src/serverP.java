@@ -100,13 +100,12 @@ public class serverP implements Runnable {
 
                 outToClient = new PrintWriter(client.getOutputStream(),true);
                 inFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                outToClient.println("Welcome, please enter your username");
                 userName = inFromClient.readLine(); // whatever the client sends that becomes the username
                 SERVERLOGGER.getSocketInformation(this.client, this.userName); // Get IP and Port information from client
                 broadcast(userName + " has joined the chat!");
                 String message;
                 while((message = inFromClient.readLine()) != null){
-                    if(message.equalsIgnoreCase("/quit")){
+                    if(message.equalsIgnoreCase("has left the chat!")){
                         broadcast(userName + " has left the chat!"); 
                         // Log when users has left the chat. 
                         SERVERLOGGER.logMessage(userName + " has left the chat"); 
