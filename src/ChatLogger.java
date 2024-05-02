@@ -133,6 +133,10 @@ public class ChatLogger {
         LOGGER.warning(message); 
     }
 
+    public void SEVERE(String message) {
+        LOGGER.severe(message); 
+    }
+
 
     
 }
