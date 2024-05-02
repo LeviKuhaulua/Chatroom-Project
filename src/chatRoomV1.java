@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -6,6 +5,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  *
@@ -82,6 +83,8 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
                 sendButtonActionPerformed(evt);
             }
         });
+        sendButton.setEnabled(false); // Initial set to disabled because user message is empty.
+
 
         quitButton.setText("Quit");
         quitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -93,6 +96,23 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
         userMessage.setColumns(20);
         userMessage.setRows(5);
         jScrollPane3.setViewportView(userMessage);
+        // Disable the send button if the text area is empty. 
+        userMessage.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                checkText(); 
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                checkText(); 
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                checkText(); 
+            }
+        });
+
+ 
 
         connectButton.setText("Connect");
         connectButton.addActionListener(new java.awt.event.ActionListener() {
@@ -154,34 +174,67 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Allows users to send messages to other people in the chat. Additionally, it handles logic where users
+     * may not have connected to the server. 
+     * @param evt
+     *  When the button is clicked. 
+     * @author
+     *  Somret Say
+     * @author
+     *  Levi Kuhaulua
+     */
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
-        // TODO add your handling code here:
-        // Send message to server
-        String message = userMessage.getText();
-        while (message.isBlank()) {
-
+        if (!connected) {
+            connectButton.doClick(); // Connect user to server if they haven't done so yet. 
+        } else {
+            String message = userMessage.getText();
+            outToServer.println(message);
+            userMessage.setText(""); 
+            CLIENT.logMessage(username + ": " + message); 
         }
-        outToServer.println(message);
-        userMessage.setText("");
-        CLIENT.logMessage(message); 
     }//GEN-LAST:event_sendButtonActionPerformed
 
+    /**
+     * Handles the logic when users click on the quit button. 
+     * @param evt
+     *  When the Quit button is pressed
+     * @author
+     *  Somret Say
+     * @author
+     *  Levi Kuhaulua
+     */
     private void quitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quitButtonActionPerformed
-        // TODO add your handling code here:
-        shutdown();
-        JOptionPane.showMessageDialog(this, "You left the chat");
-        System.exit(0);
         
-        try{
-            outToServer = new PrintWriter(client.getOutputStream(), true);
-            outToServer.println(username + " has left the chat!");
-        }catch(IOException e){
-            e.printStackTrace();
+        // Deals with possibility where user did not connect to server. 
+        if (!connected) { 
+            System.exit(0); 
+        } else {
+            JOptionPane.showMessageDialog(this, "Quitting out of app");
+        
+            try{
+                outToServer = new PrintWriter(client.getOutputStream(), true);
+                outToServer.println("has left the chat!");
+                shutdown();
+            }catch(IOException e){
+                CLIENT.messageException(e.getMessage()); 
+            }
 
+            System.exit(0); 
         }
+        
         //shuts down program
     }//GEN-LAST:event_quitButtonActionPerformed
 
+    /**
+     * Handles the event where the user clicks on the connect button to connect to the server. 
+     * @param evt
+     *  When the connect button is clicked. 
+     * @author 
+     *  Somret Say
+     * @author 
+     *  Levi Kuhaulua
+     */
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
         // TODO add your handling code here:
         //connects the client to the server
@@ -210,10 +263,23 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
             }
             
         } catch (IOException e) {
-            e.printStackTrace();
+            CLIENT.SEVERE(e.getMessage()); 
             JOptionPane.showMessageDialog(this, "Server does not exist!");
         }
     }//GEN-LAST:event_connectButtonActionPerformed
+
+    /**
+     * Disables/Enables the send button depending on if the user message is blank. 
+     * @author 
+     *  Levi Kuhaulua
+     */
+    private void checkText() {
+        if (!userMessage.getText().isBlank()) {
+            sendButton.setEnabled(true); 
+        } else {
+            sendButton.setEnabled(false); 
+        }
+    }
 
    /**
      * @param args the command line arguments
@@ -275,11 +341,16 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
             String message;
             while ((message = inFromServer.readLine()) != null) { 
                 chatLog.append(message + "\n");
+                // Log out messages sent from other users. 
+                if (message.split(":")[0].equalsIgnoreCase(username)) {
+                    continue; 
+                } else {
+                    CLIENT.logMessage(message); 
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            CLIENT.messageException(e.getMessage());
         }
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
 
     }
     private void shutdown() {
@@ -295,7 +366,7 @@ public class chatRoomV1 extends javax.swing.JFrame implements Runnable {
                 client.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            CLIENT.messageException(e.getMessage()); 
         }
     }
 }
