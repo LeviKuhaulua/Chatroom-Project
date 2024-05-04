@@ -133,6 +133,11 @@ public class ChatLogger {
         LOGGER.warning(message); 
     }
 
+    /**
+     * Log critical errors to the log file. 
+     * @param message
+     *  Message that caused a critical error to program
+     */
     public void SEVERE(String message) {
         LOGGER.severe(message); 
     }

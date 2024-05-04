@@ -54,6 +54,11 @@ public class serverP implements Runnable {
 
 
     }
+    /**
+     * Broadcast the message to all other users in the chat. 
+     * @param message
+     *  Message to be sent out to other users part of the group
+     */
     public void broadcast(String message){
         //broadcast message to all the clients
         for(handler ch : connections) {
@@ -64,6 +69,11 @@ public class serverP implements Runnable {
     }
 
 
+    /**
+     * Shutdown the Server. 
+     * @author 
+     *  Somret Say
+     */
     public void shutdown(){
        try{
         done = true;
@@ -95,15 +105,15 @@ public class serverP implements Runnable {
         @Override
         public void run(){
             try{
-                //this section deals with the clients.
-                //first needs to establish buffered and print writer
-
+                
+                // Create the I/O streams for clients. 
                 outToClient = new PrintWriter(client.getOutputStream(),true);
                 inFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 userName = inFromClient.readLine(); // whatever the client sends that becomes the username
                 SERVERLOGGER.getSocketInformation(this.client, this.userName); // Get IP and Port information from client
                 broadcast(userName + " has joined the chat!");
                 String message;
+                // Continously read messages from clients and broadcast them to other recipients in the chat. 
                 while((message = inFromClient.readLine()) != null){
                     if(message.equalsIgnoreCase("has left the chat!")){
                         broadcast(userName + " has left the chat!"); 
@@ -126,10 +136,22 @@ public class serverP implements Runnable {
 
         }
 
+        /**
+         * Sends out the messages to other clients in the chat. 
+         * @param message
+         *  Message to be sent out to other clients
+         * @author 
+         *  Somret Say
+         */
         public void sendMessage(String message){
             outToClient.println(message);
         }
 
+        /**
+         * Shutdown the I/O Streams for the client. 
+         * @author
+         *  Somret Say
+         */
         public void shutdown(){
             try{
                 inFromClient.close();

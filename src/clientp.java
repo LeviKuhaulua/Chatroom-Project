@@ -23,6 +23,7 @@ public class clientp implements Runnable {
     public void run() {
         // TODO Auto-generated method stub
         try{
+            // Replace with target IP and Port
             Socket client = new Socket("127.0.0.1", 12345);
             outToServer = new PrintWriter(client.getOutputStream(),true);
             inFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
